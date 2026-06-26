@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Business Card</title>
+</head>
+<body>
+
+<div id="card-container"></div>
+
+<script>
+/* =====================================================================
+   ✏️✏️✏️  Edit your personal data here  ✏️✏️✏️
+   Fill each value between the quotes. If you don't want to show something, leave it empty ""
+   ===================================================================== */
+const CONFIG = {
+  // Profile photo and cover image
+  photoUrl:  "profile.jpeg",
+  coverUrl:  "cover2.png",
+
+  // Name and Job Title
+  fullName:  "Dr.DANIEL AJEEB",
+  jobTitle:  "Zahnarzt",
+  company:   "bravadent-zahnarztpraxis",
+
+  // Contact Information
+  website:   "https://www.bravadent-zahnarztpraxis.de",
+  phone:     "01743479432",
+  email:     "info@bravadent-zahnarztpraxis.de",
+  address:   "Willy-Brandt-Platz 4, 46045 Oberhausen",
+  mapsUrl:   "https://maps.app.goo.gl/35YLETtBwxwsfdfMA",
+  doctolib:  "https://www.doctolib.de/zahnarztpraxis/oberhausen/zahnarztpraxis-daniel-ajeeb",
+
+  // Social media links
+  linkedin:  "https://linkedin.com/in/alexsmith-demo",
+  instagram: "https://instagram.com/alexsmith-demo",
+  facebook:  "https://facebook.com/alexsmith-demo",
+  tiktok:    "https://tiktok.com/@alexsmith-demo",
+  youtube:   "https://youtube.com/@alexsmith-demo",
+
+  /* =====================================================================
+     Brand identity — Gray Azure palette
+     White            #ffffff
+     Gray azure       #516068
+     Dark gray azure  #2b353d
+     Gray azure       #7c8e95
+     Pastel gray azure#aec0c5
+     ===================================================================== */
+  white:      "#ffffff",
+  azure:      "#516068",
+  azureDark:  "#2b353d",
+  azureMid:   "#7c8e95",
+  azurePale:  "#aec0c5"
+};
+/* ===================================================================== */
+
+// Safely construct and inject the HTML
+const cardHTML = `
+<style>
+  :root{
+    --white:      ${CONFIG.white};
+    --azure:      ${CONFIG.azure};
+    --azure-dark: ${CONFIG.azureDark};
+    --azure-mid:  ${CONFIG.azureMid};
+    --azure-pale: ${CONFIG.azurePale};
+
+    --bg:     var(--white);
+    --card:   var(--white);
+    --text:   var(--azure-dark);
+    --muted:  var(--azure-mid);
+    --accent: var(--azure);
+    --line:   var(--azure-pale);
+  }
+  html, body{ width:100%; height: 100%; margin: 0; padding: 0; }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display:flex; justify-content:center;
+    min-height:100vh;
+    min-height:100dvh;
+  }
+  .wrap{
+    width:100%;
+    max-width:430px;
+    background:
+      linear-gradient(rgba(81,96,104,0.10), rgba(81,96,104,0.10)),
+      var(--card);
+    min-height:100vh;
+    min-height:100dvh;
+    position:relative;
+    overflow:hidden;
+    box-shadow: 0 0 60px rgba(0,0,0,.5);
+  }
+  @media (min-width: 480px){
+    body{ padding: 40px 16px; align-items:center; }
+    .wrap{
+      min-height:auto;
+      border-radius:20px;
+      border: 1px solid rgba(174,192,197,0.12);
+    }
+  }
+  .cover{
+    width:100%;
+    aspect-ratio: 5 / 2;
+    background-image:
+      linear-gradient(135deg, rgba(81,96,104,0.55), rgba(43,53,61,0.15)),
+      url('${CONFIG.coverUrl}');
+    background-size:cover; background-position:center;
+    position:relative;
+  }
+  .cover::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, var(--card) 100%);
+  }
+  .photo{
+    width: clamp(84px, 28vw, 120px);
+    height: clamp(84px, 28vw, 120px);
+    border-radius:50%;
+    border:4px solid var(--card);
+    background-image:url('${CONFIG.photoUrl}');
+    background-size:cover; background-position:center;
+    background-color: var(--card);
+    margin: clamp(-50px, -16vw, -65px) auto 0;
+    position:relative; z-index:2;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
+  }
+  .info{ text-align:center; padding: 14px clamp(16px,6vw,24px) 6px; }
+  .name{ font-size: clamp(19px, 5.5vw, 24px); font-weight:700; letter-spacing:.3px; line-height:1.3; word-break:break-word; color: var(--text); }
+  .title{ color: var(--accent); font-size: clamp(13px, 3.6vw, 15px); margin-top:4px; font-weight:600; line-height:1.4;}
+  .company{ color: var(--muted); font-size: clamp(12.5px, 3.4vw, 14px); margin-top:2px; }
+  .save-btn{
+    display:block;
+    width:calc(100% - clamp(32px,8vw,48px));
+    margin: 18px auto 8px;
+    padding: 13px 10px;
+    text-align:center;
+    background: var(--accent);
+    color: var(--white);
+    font-weight:700;
+    font-size: clamp(14px, 3.8vw, 15px);
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    transition: transform .15s ease;
+  }
+  .save-btn:active{ transform: scale(.97); }
+  .save-status{
+    text-align:center; font-size:13px; color:var(--muted);
+    min-height:18px; margin-bottom:6px;
+  }
+  .rows{ padding: 6px clamp(16px,6vw,24px) 10px; display:flex; flex-direction:column; gap:10px; }
+  .row{
+    display:flex; align-items:center; gap:14px;
+    background: rgba(174,192,197,0.07);
+    border:1px solid rgba(174,192,197,0.16);
+    border-radius:12px;
+    padding:12px 14px;
+    text-decoration:none;
+    color: var(--text);
+  }
+  .row .icon{
+    width:34px; height:34px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:9px;
+    background: var(--azure);
+    color: var(--white);
+    font-size:16px;
+  }
+  .row span{ font-size: clamp(12.5px, 3.4vw, 14px); word-break:break-word; overflow-wrap:anywhere; text-align:left; min-width:0; flex:1; }
+  .socials{
+    display:flex; justify-content:center; flex-wrap:nowrap; gap: clamp(8px, 3vw, 14px);
+    padding: 8px clamp(16px,6vw,24px) 26px;
+  }
+  .socials a{
+    width: clamp(32px, 11vw, 42px); height: clamp(32px, 11vw, 42px); flex:none;
+    border-radius:50%;
+    background: rgba(174,192,197,0.10);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--text);
+    font-size: clamp(11px, 3.2vw, 13px); font-weight:700;
+    text-decoration:none;
+  }
+  .footer{
+    text-align:center; font-size:11px; color:var(--muted);
+    padding: 0 16px 18px;
+  }
+  @media (max-width: 340px){
+    .rows{ gap:8px; }
+    .row{ padding:10px 12px; gap:10px; }
+    .row .icon{ width:30px; height:30px; font-size:14px; }
+  }
+  .cover{ animation: fadeIn .6s ease forwards; }
+  .photo{ animation: photoPop .6s .15s cubic-bezier(.34,1.56,.64,1) forwards; }
+  .info .name{ animation: riseIn .5s .35s ease forwards; }
+  .info .title{ animation: riseIn .5s .42s ease forwards; }
+  .info .company{ animation: riseIn .5s .48s ease forwards; }
+  .save-btn{ animation: riseIn .5s .55s ease forwards, pulseGlow 2.6s 2s ease-in-out infinite; }
+  .rows .row{ opacity:0; animation: riseIn .45s ease forwards; }
+  .rows .row:nth-child(1){ animation-delay: .62s; }
+  .rows .row:nth-child(2){ animation-delay: .68s; }
+  .rows .row:nth-child(3){ animation-delay: .74s; }
+  .rows .row:nth-child(4){ animation-delay: .80s; }
+  .socials a{ opacity:0; animation: riseIn .45s ease forwards; }
+  .socials a:nth-child(1){ animation-delay: .86s; }
+  .socials a:nth-child(2){ animation-delay: .90s; }
+  .socials a:nth-child(3){ animation-delay: .94s; }
+  .socials a:nth-child(4){ animation-delay: .98s; }
+  .socials a:nth-child(5){ animation-delay: 1.02s; }
+
+  .row{ transition: transform .18s ease, background .18s ease, border-color .18s ease; }
+  .row:active{ transform: scale(.97); background: rgba(174,192,197,0.10); }
+  @media (hover:hover){
+    .row:hover{ transform: translateY(-2px); background: rgba(174,192,197,0.10); border-color: rgba(174,192,197,0.4); }
+    .socials a:hover{ transform: translateY(-3px); background: var(--accent); color: var(--white); }
+  }
+  .socials a{ transition: transform .18s ease, background .18s ease, color .18s ease; }
+  .socials a:active{ transform: scale(.92); }
+
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes riseIn{ from{ opacity:0; transform: translateY(10px); } to{ opacity:1; transform: translateY(0); } }
+  @keyframes photoPop{ from{ opacity:0; transform: scale(.7); } to{ opacity:1; transform: scale(1); } }
+  @keyframes pulseGlow{
+    0%, 100%{ box-shadow: 0 0 0 0 rgba(174,192,197,0); }
+    50%{ box-shadow: 0 0 0 8px rgba(174,192,197,0.18); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .save-btn{ transition:none; }
+    *{ animation:none !important; opacity:1 !important; transform:none !important; }
+  }
+</style>
+
+<div class="wrap">
+  <div class="cover"></div>
+  <div class="photo"></div>
+  <div class="info">
+    <div class="name">${CONFIG.fullName}</div>
+    <div class="title">${CONFIG.jobTitle}</div>
+    ${CONFIG.company ? `<div class="company">${CONFIG.company}</div>` : ""}
+  </div>
+
+  <button class="save-btn" onclick="saveContact()">📇 Save Contact</button>
+  <div class="save-status" id="status"></div>
+
+<div class="rows">
+  ${CONFIG.website ? `
+  <a class="row" href="${CONFIG.website}" target="_blank" rel="noopener noreferrer">
+    <div class="icon">🌐</div>
+    <span>${CONFIG.website.replace(/^https?:\/\//, '')}</span>
+  </a>` : ""}
+
+  ${CONFIG.doctolib ? `
+  <a class="row" href="${CONFIG.doctolib}" target="_blank" rel="noopener noreferrer">
+    <div class="icon">📅</div>
+    <span>Termin online buchen</span>
+  </a>` : ""}
+
+  ${CONFIG.phone ? `
+  <a class="row" href="tel:${CONFIG.phone}">
+    <div class="icon">📞</div>
+    <span>${CONFIG.phone}</span>
+  </a>` : ""}
+
+  ${CONFIG.email ? `
+  <a class="row" href="mailto:${CONFIG.email}">
+    <div class="icon">✉️</div>
+    <span>${CONFIG.email}</span>
+  </a>` : ""}
+
+  ${CONFIG.address ? `
+  <a class="row" href="${CONFIG.mapsUrl || '#'}" target="_blank" rel="noopener noreferrer">
+    <div class="icon">📍</div>
+    <span>${CONFIG.address}</span>
+  </a>` : ""}
+</div>
+
+  <div class="socials">
+    ${CONFIG.linkedin ? `<a href="${CONFIG.linkedin}" target="_blank">in</a>` : ""}
+    ${CONFIG.instagram ? `<a href="${CONFIG.instagram}" target="_blank">IG</a>` : ""}
+    ${CONFIG.facebook ? `<a href="${CONFIG.facebook}" target="_blank">FB</a>` : ""}
+    ${CONFIG.tiktok ? `<a href="${CONFIG.tiktok}" target="_blank">TT</a>` : ""}
+    ${CONFIG.youtube ? `<a href="${CONFIG.youtube}" target="_blank">YT</a>` : ""}
+  </div>
+
+  <div class="footer">Scan the code — Save contact with one tap</div>
+</div>
+`;
+
+// Inject into the DOM safely
+document.getElementById('card-container').innerHTML = cardHTML;
+
+function saveContact(){
+  const btn = document.querySelector('.save-btn');
+  btn.style.transform = "scale(.95)";
+  setTimeout(()=>{ btn.style.transform = ""; }, 150);
+
+  const lines = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    `FN:${CONFIG.fullName}`,
+    `TITLE:${CONFIG.jobTitle}`,
+    CONFIG.company ? `ORG:${CONFIG.company}` : "",
+    CONFIG.phone ? `TEL;TYPE=CELL:${CONFIG.phone}` : "",
+    CONFIG.email ? `EMAIL:${CONFIG.email}` : "",
+    CONFIG.address ? `ADR;TYPE=WORK:;;${CONFIG.address}` : "",
+    CONFIG.website ? `URL:${CONFIG.website}` : "",
+    "END:VCARD"
+  ].filter(Boolean).join("\r\n");
+
+  const blob = new Blob([lines], { type: "text/vcard;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (CONFIG.fullName || "contact").replace(/\s+/g,"_") + ".vcf";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  const status = document.getElementById("status");
+  status.textContent = "✅ Contact downloaded";
+  status.style.animation = "none";
+  requestAnimationFrame(()=>{ status.style.animation = "riseIn .3s ease forwards"; });
+}
+</script>
+</body>
+</html>
